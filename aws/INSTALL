@@ -1,0 +1,44 @@
+--AWS Secrets Manager.
+
+Set up Access Key ID for User (~/.aws/credentials)
+Set up a KWS ARN Encryption key to use for the Region
+Users -> Encryption Keys - Select us-west-2
+
+--Ensure your user account has permission
+
+Users -> <user> Add Permission SecretsManagerReadWrite
+
+--S3 Bucket required
+
+S3 bucket - Create in us-west-2 region
+
+--SSH Key
+
+EC2->KeyPairs -> For default access to EC2.
+
+--Rotation Script
+
+pip install requests
+pip install boto3
+
+--Scripts
+
+Update global variables
+
+--Usage
+
+--Add/Replace SSH Key in AWS Secret Manager
+
+./eb_aws_sm.py -a <replace/new> -v <vpc-id>
+
+--Publish
+
+./eb_app_publish.py -a <app.name> -v <version-no> -d <version-description> -b <s3-bucket> -f <app.zip>
+
+--Read AWS Secret Key and Create new EB Application
+
+./eb_app_create.py -u <ci_email> -p <ci_pass> -d <datacenter> -c <customer-id> -e <env-id> -v <vpc-id> -a <app.name> -n <app.environment> -l <version-no> -b <s3-bucket> -f <app.zip>
+
+--Read AWS Secret Key and Update EB Application
+
+./eb_app_update.py -u <ci_email> -p <ci_pass> -d <datacenter> -c <customer-id> -e <env-id> -v <vpc-id> -a <app.name> -n <app.environment> -l <version-no>

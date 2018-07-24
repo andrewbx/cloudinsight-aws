@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.2",
+  "description": "Add Alert Logic SSH User - IAM",
+  "parameters":{
+        "sshUser":{
+            "type":"String",
+            "description":"SSH Username",
+            "default":"alertlogic",
+            "maxChars":4096
+        }
+  },
+  "runtimeConfig": {
+    "aws:runShellScript": {
+      "properties": [
+        {
+          "id": "0.aws:runShellScript",
+          "runCommand": [
+		"#!/bin/bash",
+		"set -e",
+		"SSH_USER={{ sshUser }}",
+		"if [ -z \"$(getent passwd $SSH_USER)\" ]; then",
+		"   useradd $SSH_USER -m -c \"Alert Logic\" -s /bin/bash > /dev/null 2>&1",
+		"   usermod -a -G root $SSH_USER",
+		"   mkdir /home/$SSH_USER/.ssh",
+		"   chown $SSH_USER /home/$SSH_USER/.ssh/",
+		"   touch /home/$SSH_USER/.ssh/authorized_keys",
+		"fi",
+		"if [ -z \"$(command -v aws)\" ]; then",
+		"   if [ -z \"$(command -v apt)\" ]; then",
+		"      yum -y install awscli",
+		"   fi",
+		"   if [ -z \"$(command -v yum)\" ]; then",
+		"      apt update",
+		"      apt install awscli -y",
+		"   fi",
+		"fi",
+		"cat /dev/null > /home/$SSH_USER/.ssh/authorized_keys",
+		"aws iam list-ssh-public-keys --user-name $SSH_USER --query \"SSHPublicKeys[?Status == 'Active'].[SSHPublicKeyId]\" --output text |",
+		"while read KeyId; do",
+		"   aws iam get-ssh-public-key --user-name $SSH_USER --ssh-public-key-id \"$KeyId\" --encoding SSH --query \"SSHPublicKey.SSHPublicKeyBody\" --output text >> /home/$SSH_USER/.ssh/authorized_keys",
+		"done",
+		"chown $SSH_USER /home/$SSH_USER/.ssh/authorized_keys",
+		"setfacl -m u:$SSH_USER:rwx /home/$SSH_USER/.ssh/authorized_keys",
+		"chmod 700 /home/$SSH_USER/.ssh",
+		"chmod 400 /home/$SSH_USER/.ssh/authorized_keys"          ]
+        }
+      ]
+    }
+  }
+}
