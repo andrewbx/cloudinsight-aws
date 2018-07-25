@@ -7,11 +7,10 @@ from Crypto.PublicKey import RSA
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 # Globals
-EB = boto3.client("elasticbeanstalk")
 logging.basicConfig(
     format="%(asctime)s %(name)s %(levelname)s - %(message)s", level=logging.INFO
 )
-LOG = logging.getLogger("log.iam_ci_update")
+LOG = logging.getLogger("log.ec2_iam_update")
 
 # Hide annoying log messages
 logging.getLogger(
